@@ -25,7 +25,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/blob": "^1.1.1",
     "@widgetbot/react-embed": "^1.9.0",
-    "ai": "^4.3.16",
+    "ai": "^5.0.52",
     "bcrypt-ts": "^7.1.0",
     "bcryptjs": "^3.0.2",
     "cheerio": "^1.1.2",
