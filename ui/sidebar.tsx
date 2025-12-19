@@ -159,7 +159,7 @@ export default function Sidebar({ children }: { children: React.ReactNode }) {
             )}
           />
 
-          <nav className="h-full overflow-y-auto sidebar-nav">
+          <nav className="w-full max-h-full overflow-x-hidden overflow-y-auto sidebar-nav">
             <ul
               className={clsx(
                 "transition-all my-2 flex flex-col items-center",
