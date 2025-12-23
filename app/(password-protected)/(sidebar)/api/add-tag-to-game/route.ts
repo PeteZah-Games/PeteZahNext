@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          setAll(cookiesToSet: any) {
             for (const { name, value, options } of cookiesToSet) {
               cookieStore.set({ name, value, ...options });
             }
