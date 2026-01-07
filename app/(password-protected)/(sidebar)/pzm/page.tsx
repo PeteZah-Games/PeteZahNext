@@ -25,9 +25,10 @@ import { PiRepeat, PiRepeatBold, PiRepeatOnceBold } from "react-icons/pi";
 import { createClient } from "@/utils/supabase/client";
 import { setLocalStorage } from "@/ui/settings-manager";
 import { PrimaryButton } from "@/ui/global/buttons";
+import { AnimatePresence, motion } from "motion/react";
 
 // Standard song type
-interface YTMusicReult {
+interface YTMusicResult {
   name: string;
   artist: { artistId: string; name: string };
   duration: number;
@@ -39,17 +40,17 @@ interface YTMusicReult {
 export default function Page() {
   // Stateful values
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<YTMusicReult[] | null>(
+  const [searchResults, setSearchResults] = useState<YTMusicResult[] | null>(
     null
   );
-  const [queue, setQueue] = useState<YTMusicReult[] | null>(null);
+  const [queue, setQueue] = useState<YTMusicResult[] | null>(null);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<null | number>(
     null
   );
   const [playerState, setPlayerState] = useState<number | null>(null);
   const [repeating, setRepeating] = useState<true | false | 1>(false);
   const [muted, setMuted] = useState(false);
-  const [starredSongs, setStarredSongs] = useState<YTMusicReult[] | []>([]);
+  const [starredSongs, setStarredSongs] = useState<YTMusicResult[] | []>([]);
   const [sideMenuPage, setSideMenuPage] = useState<"queue" | "starredSongs">(
     "queue"
   );
@@ -194,7 +195,7 @@ export default function Page() {
     }
   }
 
-  async function addSongToStars(songData: YTMusicReult) {
+  async function addSongToStars(songData: YTMusicResult) {
     const trackWithId = { ...songData, id: v4() };
     setStarredSongs([...starredSongs, trackWithId]);
 
@@ -215,7 +216,7 @@ export default function Page() {
     });
   }
 
-  async function removeSongFromStars(songData: YTMusicReult) {
+  async function removeSongFromStars(songData: YTMusicResult) {
     setStarredSongs(
       starredSongs.filter((song) => song.videoId !== songData.videoId)
     );
@@ -237,7 +238,7 @@ export default function Page() {
     });
   }
 
-  async function addSongToQueue(songData: YTMusicReult) {
+  async function addSongToQueue(songData: YTMusicResult) {
     const trackWithId = { ...songData, id: v4() };
     setQueue([...(queue ?? []), trackWithId]);
   }
@@ -249,7 +250,7 @@ export default function Page() {
     playerVars: {
       autoplay: 1,
     },
-    host: "https://www.youtube.com", 
+    host: "https://www.youtube.com",
     controls: 0,
     modestbranding: 1,
     rel: 0,
@@ -757,75 +758,77 @@ export default function Page() {
         </div>
         {((queue && queue.length) || (starredSongs && starredSongs.length)) >
           0 && (
-          <>
-            <div className="flex flex-col gap-2 max-w-[30%] rounded-[12px] border-2 border-[#0096FF] backdrop-blur-md backdrop-filter backdrop-opacity-50 bg-[#0A1D37] p-[20px]! overflow-auto max-h-[80%]">
-              <div className="flex items-center justify-center w-full gap-2">
-                <PrimaryButton
-                  text="Queue"
-                  className={clsx(sideMenuPage == "queue" && "bg-gray-800")}
-                  onClick={() => {
-                    setSideMenuPage("queue");
-                  }}
-                />
-                <PrimaryButton
-                  text="Starred Songs"
-                  className={clsx(
-                    sideMenuPage == "starredSongs" && "bg-gray-800"
-                  )}
-                  onClick={() => {
-                    setSideMenuPage("starredSongs");
-                  }}
-                />
-              </div>
-              {sideMenuPage == "queue" ? (
-                <>
-                  {queue && queue.length > 0 ? (
-                    queue.map((trackData, index) => (
-                      <div
-                        key={trackData.id}
-                        className={clsx(
-                          "flex items-center justify-between gap-3 cursor-pointer p-2! rounded-lg",
-                          index == currentTrackIndex
-                            ? "bg-white/10 hover:bg-white/20"
-                            : "hover:bg-white/10"
-                        )}
-                      >
-                        {" "}
-                        <button
-                          onClick={() => {
-                            setCurrentTrackIndex(index);
-                          }}
-                          className="w-full h-full"
+          <motion.div className="flex flex-col gap-2 max-w-[30%] rounded-[12px] border-2 border-[#0096FF] backdrop-blur-md backdrop-filter backdrop-opacity-50 bg-[#0A1D37] p-[20px]! overflow-auto max-h-[80%]">
+            <div className="flex items-center justify-center w-full gap-2">
+              <PrimaryButton
+                text="Queue"
+                className={clsx(sideMenuPage === "queue" && "bg-gray-800")}
+                onClick={() => setSideMenuPage("queue")}
+              />
+              <PrimaryButton
+                text="Starred Songs"
+                className={clsx(
+                  sideMenuPage === "starredSongs" && "bg-gray-800"
+                )}
+                onClick={() => setSideMenuPage("starredSongs")}
+              />
+            </div>
+            <motion.div layout>
+              <AnimatePresence mode="wait">
+                {sideMenuPage === "queue" && (
+                  <motion.div
+                    key="queue"
+                    layout
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col gap-2"
+                  >
+                    {queue && queue.length > 0 ? (
+                      queue.map((trackData, index) => (
+                        <motion.div
+                          layout
+                          key={trackData.id}
+                          className={clsx(
+                            "flex items-center justify-between gap-3 cursor-pointer p-2! rounded-lg",
+                            index === currentTrackIndex
+                              ? "bg-white/10 hover:bg-white/20"
+                              : "hover:bg-white/10"
+                          )}
                         >
-                          <div className="flex items-center gap-3">
-                            {" "}
-                            <img
-                              src={`/api/ytmusic/thumbnail?url=${encodeURIComponent(
-                                trackData.thumbnails.sort(
-                                  (a, b) => b.width - a.width
-                                )[0].url
-                              )}`}
-                              alt={trackData.name}
-                              width={50}
-                              height={50}
-                              className="rounded-md"
-                            />
-                            <div className="flex flex-col gap-1">
-                              <MarqueeText
-                                text={trackData.name}
-                                className="overflow-x-auto text-left"
-                              />
-                              <MarqueeText
-                                className="text-sm text-left text-white/70 border-white/70"
-                                text={trackData.artist.name}
-                              />
-                            </div>
-                          </div>
-                        </button>
-                        <div>
                           <button
-                            type="button"
+                            onClick={() => setCurrentTrackIndex(index)}
+                            className="w-full h-full"
+                          >
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={`/api/ytmusic/thumbnail?url=${encodeURIComponent(
+                                  trackData.thumbnails.sort(
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    (a: any, b: any) => b.width - a.width
+                                  )[0].url
+                                )}`}
+                                alt={trackData.name}
+                                width={50}
+                                height={50}
+                                className="rounded-md"
+                              />
+                              <div className="flex flex-col gap-1">
+                                <MarqueeText
+                                  text={trackData.name}
+                                  className="overflow-x-auto text-left"
+                                />
+                                <MarqueeText
+                                  text={trackData.artist.name}
+                                  className="text-sm text-left text-white/70 border-white/70"
+                                />
+                              </div>
+                            </div>
+                          </button>
+                          <button
                             title="Remove song from queue"
+                            type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -845,42 +848,41 @@ export default function Page() {
                                 setCurrentTrackIndex(currentTrackIndex - 1);
                               }
                             }}
-                            className="rounded-full mr-2! p-3! bg-white/20 hover:bg-white/30 z-100"
+                            className="rounded-full mr-2! p-3! bg-white/20 hover:bg-white/30"
                           >
                             <FaTrashAlt />
                           </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <>
-                      {" "}
+                        </motion.div>
+                      ))
+                    ) : (
                       <p className="w-full text-center text-gray-400">
                         Your queue is empty
                       </p>
-                    </>
-                  )}
-                </>
-              ) : (
-                sideMenuPage == "starredSongs" && (
-                  <>
+                    )}
+                  </motion.div>
+                )}
+
+                {sideMenuPage === "starredSongs" && (
+                  <motion.div
+                    key="starred"
+                    layout
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col gap-2"
+                  >
                     {starredSongs && starredSongs.length > 0 ? (
-                      starredSongs.map((trackData, index) => (
-                        <div
+                      starredSongs.map((trackData) => (
+                        <motion.div
+                          layout
                           key={trackData.id}
-                          className={clsx(
-                            "flex items-center justify-between gap-3 cursor-pointer p-2! rounded-lg",
-                            index == currentTrackIndex
-                              ? "bg-white/10 hover:bg-white/20"
-                              : "hover:bg-white/10"
-                          )}
+                          className="flex items-center justify-between gap-3 cursor-pointer p-2! rounded-lg hover:bg-white/10"
                         >
-                          {" "}
                           <button
                             type="button"
                             onClick={() => {
-                              // i know this logic is stupid but its because setState is async
-                              if (queue?.length == 0 || queue == null) {
+                              if (!queue || queue.length === 0) {
                                 addSongToQueue(trackData);
                                 setCurrentTrackIndex(0);
                               } else {
@@ -890,59 +892,54 @@ export default function Page() {
                             className="w-full h-full"
                           >
                             <div className="flex items-center gap-3">
-                              {" "}
                               <img
                                 src={`/api/ytmusic/thumbnail?url=${encodeURIComponent(
-                                  trackData.thumbnails?.sort(
-                                    (a, b) => b.width - a.width
+                                  trackData.thumbnails.sort(
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    (a: any, b: any) => b.width - a.width
                                   )[0].url
                                 )}`}
-                                alt={trackData?.name}
+                                alt={trackData.name}
                                 width={50}
                                 height={50}
                                 className="rounded-md"
                               />
                               <div className="flex flex-col gap-1">
                                 <MarqueeText
-                                  text={trackData?.name}
+                                  text={trackData.name}
                                   className="overflow-x-auto text-left"
                                 />
                                 <MarqueeText
+                                  text={trackData.artist.name}
                                   className="text-sm text-left text-white/70 border-white/70"
-                                  text={trackData?.artist?.name}
                                 />
                               </div>
                             </div>
                           </button>
-                          <div>
-                            <button
-                              type="button"
-                              title="Un-star song"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-
-                                removeSongFromStars(trackData);
-                              }}
-                              className="rounded-full mr-2! p-3! bg-white/20 hover:bg-white/30 z-100"
-                            >
-                              <FaTrashAlt />
-                            </button>
-                          </div>
-                        </div>
+                          <button
+                            title="Remove song from starred songs"
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeSongFromStars(trackData);
+                            }}
+                            className="rounded-full mr-2! p-3! bg-white/20 hover:bg-white/30"
+                          >
+                            <FaTrashAlt />
+                          </button>
+                        </motion.div>
                       ))
                     ) : (
-                      <>
-                        <p className="w-full text-center text-gray-400">
-                          You have no starred songs.
-                        </p>
-                      </>
+                      <p className="w-full text-center text-gray-400">
+                        You have no starred songs.
+                      </p>
                     )}
-                  </>
-                )
-              )}
-            </div>
-          </>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
         )}
       </div>
     </>
