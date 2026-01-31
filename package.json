@@ -76,7 +76,7 @@
     "dependency-cruiser": "^17.0.1",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
-    "supabase": "^2.72.8",
+    "supabase": "^2.74.4",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.2.9",
     "typescript": "^5",
