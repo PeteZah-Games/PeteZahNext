@@ -198,7 +198,7 @@ export default function Chat() {
           <button
             className={clsx(
               "bg-black rounded-2xl px-2! py-1! text-red-500 border-2! border-white mx-2! transition-opacity duration-500",
-              messages.length > 0 ? "opacity-100" : "opacity-0"
+              messages.length > 0 ? "opacity-100" : "opacity-0 hidden"
             )}
             type="submit"
             onClick={wipeChat}

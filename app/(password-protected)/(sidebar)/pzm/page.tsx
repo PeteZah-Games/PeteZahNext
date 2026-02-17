@@ -722,7 +722,7 @@ export default function Page() {
                     <div className="h-[6px] bg-white/20 rounded-3xl relative hover:h-[12px] transition-all duration-300 w-full"></div>
                   </>
                 )}
-                <div className="flex justify-between mt-1 timecodes">
+                <div className="flex justify-between mt-1">
                   <span>{formatTime(currentTime)}</span>
                   <span>
                     {queue &&
